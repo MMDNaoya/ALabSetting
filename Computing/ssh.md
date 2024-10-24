@@ -24,19 +24,24 @@ Aliceの.ssh/configファイルは以下のようになる．
 Host server
   HostName 192.168.1.256
   User alice.alexander
-  IdentityFile ~/.ssh/id_ed25519
+  IdentityFile ~/.ssh/id_rsa
 ```
 
 # 3. ポートフォワーディング設定
 各ユーザは特定の[ポート](https://wa3.i-3-i.info/word1774.html)を用いてサーバ上のjupyterにアクセスする．
 ポートフォワーディングはローカルのポートとサーバのポートを同一視させるSSHの機能であり，これによってローカルのブラウザからサーバ上のjupyter notebookにアクセスできる．
-AliceとBobに割り当てられたポートがそれぞれ10001~10010, 10011~10020とすると，Aliceの```.ssh/config```を以下のように編集することでssh serverするときに自動的にポートフォワーディングが行われる．
+AliceとBobに割り当てられたポートがそれぞれ10001\~10010， 10011\~10020とすると，Aliceの```.ssh/config```を以下のように編集することでssh serverするときに自動的にポートフォワーディングが行われる．
+
 ```.ssh/config
 Host server
   HostName 192.168.1.256
   User alice.alexander
-  IdentityFile ~/.ssh/id_ed25519
-```
+  IdentityFile ~/.ssh/id_rsa
 
+  LocalForward 10001 localhost:10001
+  LocalForward 10002 localhost:10002
+  #(以下略)
+```
+この設定でssh接続していれば，サーバーの10001ポートにローカルのlocalhost:10001で接続できる．
 
 ![Untitled Diagram drawio](https://github.com/user-attachments/assets/420a7a2b-ebee-4086-87c5-775a85d47d84)
