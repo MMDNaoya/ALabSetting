@@ -43,8 +43,9 @@ cd ./projects/myproject
 rye init --virtual --name myproject
 ```
 によって，```./projects/myproject```にryeの環境が作成される．　　
-rye addによってpythonパッケージを環境にインストールできる．
-```rye add ipykernel```によって，Jupyterからこのrye環境をカーネルとして利用できるようにする．
+rye addによってpythonパッケージを環境にインストールできる．  
+```rye add --sync ipykernel```によって，Jupyterからこのrye環境をカーネルとして利用できるようになる．
+他に必要なパッケージを```rye add```コマンドによって追加できる．例えば```rye add scikit-learn```
 
 ## Jupyterでカーネルとして利用
 ブラウザでjupyterに接続し，```myproject```に移動する．　　
