@@ -6,8 +6,6 @@ import logging
 from pathlib import Path
 from socket import gethostname
 
-from joblib import Memory
-
 CONTROLLER_IP = {"exclusive": "200.0.0.1",
                  "nonexclusive": "192.168.1.200",
                  }
@@ -23,19 +21,12 @@ HOSTS = """
             192.168.1.14 epyc1
         """
 
-CACHE_DIR = "/share/installation/src"
+CACHE_DIR = "/cluster/share/installation/src"
 JULIA_MAJOR_VER = "1.11"
 JULIA_VER = "1.11.4"
 AOCC_VER = "5.0.0_1"
 INTEL_COMPILER_VER = "2025.0.1.47"
 
-
-# キャッシュディレクトリの設定
-memory = Memory("/tmp", verbose=0)
-""" 
-@memory.cacheデコレータ付きで定義された関数は実行時に結果が/tmpに保存される．
-どこかでこのスクリプトが失敗したあとでもう一度実行すると，成功した関数はスキップされ，失敗した関数から実行が再開される．
-"""
 
 # ロガーの設定
 logging.basicConfig(
@@ -93,7 +84,7 @@ def run_command(command, check=True, username="root"):
         raise  # 例外を再送出して呼び出し元にエラーを伝える
 
 
-@memory.cache
+
 def configure_network(ip):
     """Netplan に固定 IP 設定を追加"""
     netplan_config = f"""
@@ -126,12 +117,12 @@ def configure_network(ip):
     run_command("netplan apply")
 
 
-@memory.cache
+
 def configure_hostname(hostname):
     run_command(f"hostname {hostname}")
 
 
-@memory.cache
+
 def configure_chrony(node_mode):
     """時計同期の設定"""
     run_command("apt install -y chrony")
@@ -151,13 +142,13 @@ def configure_chrony(node_mode):
     run_command("systemctl restart chrony")
 
 
-@memory.cache
+
 def setup_nfs(node_mode):
     """NFS クライアントの設定"""
     run_command("apt install -y nfs-common")
     
     # マウント先の作成
-    for mount_point in ["/archive", "/share"]:
+    for mount_point in ["/cluster/archive", "/cluster/share"]:
         if not os.path.exists(mount_point):
             run_command(f"mkdir -p {mount_point}")
             run_command(f"chmod 777 -R {mount_point}")
@@ -166,8 +157,8 @@ def setup_nfs(node_mode):
     # /etc/fstab にマウント設定を追加
     controller_ip = CONTROLLER_IP[node_mode]
     fstab_entry = f"""
-        {controller_ip}:/archive /archive nfs defaults 0 0
-        {controller_ip}:/share /share nfs defaults 0 0    
+        {controller_ip}:/cluster/archive /cluster/archive nfs defaults 0 0
+        {controller_ip}:/cluster/share /cluster/share nfs defaults 0 0    
         """
     with open("/etc/fstab", "r") as f:
         if fstab_entry not in f.read():
@@ -176,21 +167,20 @@ def setup_nfs(node_mode):
     run_command("mount -a")
 
 
-@memory.cache
+
 def install_common_packages():
     """一般的なソフトウェアのインストール"""
     run_command("apt update")
     run_command("apt install -y nano ca-certificates curl gnupg software-properties-common")
 
 
-@memory.cache
 def install_apptainer():
     """Apptainer のインストール"""
     run_command("add-apt-repository -y ppa:apptainer/ppa")
     run_command("apt update && apt install -y apptainer")
 
 
-@memory.cache
+
 def install_docker():
     """Docker のインストール
     rootlessのほうがいいか？
@@ -218,7 +208,6 @@ def install_docker():
     run_command("usermod -aG docker worker")
 
 
-@memory.cache
 def install_julia():
     """プログラミング言語のインストール"""
     # Julia
@@ -232,24 +221,21 @@ def install_julia():
     run_command(f"chmod +x /etc/profile.d/julia{JULIA_VER}.sh")
 
 
-@memory.cache
 def install_python():
     # Python（rye）
     run_command("""curl -LsSf https://astral.sh/uv/install.sh | sudo env UV_INSTALL_DIR="/usr/local/bin" sh""")
 
-@memory.cache
+
 def install_rust():
     # Rust
     run_command("apt install -y cargo")
 
 
-@memory.cache
 def install_c():
    # C, Fortran
     run_command("apt install -y gcc gfortran build-essential")
 
 
-@memory.cache
 def install_cpu_specific_compilers():
     hostname = gethostname()
     cpu_prefix = hostname[0]
@@ -270,13 +256,11 @@ fi
         run_command("sh " + str(Path(CACHE_DIR) / f"intel-oneapi-hpc-toolkit-{INTEL_COMPILER_VER}_offline.sh") + "-a --silent --cli --eula accept")
 
 
-@memory.cache
 def check_compiler_version():
     assert os.path.exists(Path(CACHE_DIR) / f"aocc-compiler-{AOCC_VER}_amd64.deb"), f"download aocc-compiler-{AOCC_VER}_amd64.deb to {CACHE_DIR}"
     assert os.path.exists(Path(CACHE_DIR) / f"intel-oneapi-hpc-toolkit-{INTEL_COMPILER_VER}_offline.sh"), f"download intel-oneapi-hpc-toolkit-{INTEL_COMPILER_VER}_offline.sh to {CACHE_DIR}"
 
 
-@memory.cache
 def config_slurm():
     assert (Path(CACHE_DIR) / "slurm.key").exists(), f"slurm.key does not exist in {CACHE_DIR}"
     run_command("apt install -y slurm-wlm")
@@ -290,15 +274,18 @@ def config_slurm():
     run_command("systemctl restart slurmd")
 
 
-@memory.cache
 def update_hostname(hostname):
     run_command(f"hostnamectl set-hostname {hostname}")
 
 
-@memory.cache
 def update_hosts():
     with open("/etc/hosts", "a") as f:
         f.write(HOSTS)
+
+def install_node_exporter():
+    run_command("apt -y install prometheus-node-exporter")
+    run_command("systemctl enable prometheus-node-exporter")
+
 
 def main(node_mode, hostname, ip):
     """メイン処理"""
@@ -321,6 +308,7 @@ def main(node_mode, hostname, ip):
     install_cpu_specific_compilers()
     update_hosts()
     config_slurm()
+    install_node_exporter()
 
 
 if __name__ == "__main__":

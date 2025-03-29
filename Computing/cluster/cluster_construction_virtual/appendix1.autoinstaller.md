@@ -20,47 +20,6 @@ ubuntu serverのインストーラである```subiquity```に対してインス�
   
   などを見てデバッグする．
 
-3. 自動インストール機能を追加したインストールメディア作成
-  2.において全ての設定がうまくいくことを確認できたら，1本のusbメモリにOSのインストーラと自動インストール設定ファイルを入れる．
-
-  (1) 準備
-
-  ```
-  sudo apt update
-  sudo apt install -y xorriso isolinux
-  ```
-  
-  (2) ubuntu isoを展開  
-  作業用ディレクトリを作成し，ISOを展開
-  ```
-  mkdir -p ~/ubuntu-iso
-  sudo mount -o loop ubuntu.iso /mnt
-  rsync -a /mnt/ ~/ubuntu-iso/
-  sudo umount /mnt
-  ```
-
-  (3) nocloudディレクトリを作成  
-  ISO内の```nocloud```用設定ファイルを配置する
-  ```
-  mkdir -p ~/ubuntu-iso/nocloud/
-  ```
-
-  (4) ```ubuntu-iso/nocloud/```に```user-data```と```meta-data```を配置  
-  (5) ```grub.cfg```を編集して```autoinstall```を有効化  
-  - ```~/ubuntu-iso/boot/grub/grub.cfg``` の後に```autoinstall``のパラメターを追加
-  - ```ds=nocloud\;s=/cdrom/nocloud/```によって，nocloud形式の設定ファイルを用いて，その設定ファイルは```/cdrom/nocloud/```の下にあることを指定する．
-  ```
--linux	/casper/vmlinuz ---
-+linux	/casper/vmlinuz --- nomodeset autoinstall ds=nocloud\;s=/cdrom/nocloud/
-  ```
-
-  (6)カスタムisoファイルを作成
-  ```
-  cd ~/ubuntu-iso
-
-  xorriso -as mkisofs -D -r -V "Custom Ubuntu Server"     -J -joliet-long -b boot/grub/i386-pc/eltorito.img     -no-emul-boot -boot-load-size 4 -boot-info-table     -o ~/custom-ubuntu-server.iso .
-  ```
-
 # 実際の設定の内容
 ## 設定の方針
 ホスト名・ipアドレスはノードごとに異なるのだが，他の設定は全て同じであることを想定する．  
