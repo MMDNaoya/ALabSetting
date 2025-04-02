@@ -17,10 +17,10 @@ screenをデタッチしたあとならば，ssh接続を切断した後もJupyt
 サーバにssh接続し，```screen```[コマンド](https://qiita.com/hnishi/items/3190f2901f88e2594a5f)を実行する．
 
 ## Jupyter起動
-Aliceに割り当てられたポート10001を指定し，Jupyterを起動する．
-Jupyterのトップディレクトリは以下のコマンドではホームディレクトリ直下の```projects```というディレクトリだが，好みで変えて良い．
+Aliceに割り当てられたポート10001を指定し，Jupyterを起動する．jupyterはpipxを使ったインストールを推奨する．
+Jupyterのトップディレクトリは以下のコマンドではホームディレクトリ直下の```projects```というディレクトリだが，好みで変えて良いし，トークンやパスワードも勝手に設定して良い．
 ```
-jupyter lab --port 10001 --NotebookApp.token='' --notebook-dir /home/alice.alexander/projects/ --no-browser --NotebookApp.password=''
+jupyter lab --port 10001 --NotebookApp.token='' --notebook-dir /home/alice.alexander/projects/ --no-browser --NotebookApp.password='' --ip 0.0.0.0
 ```
 
 ## Screenを出る
