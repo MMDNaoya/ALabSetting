@@ -23,7 +23,8 @@ Pahse2 Algorithms: aes256-sha1,aes128-sha1,3des-sha1!
 論文誌のウェブサイトなどにアクセスすると，東大経由で接続していることは検知してくれるけど，なぜか論文のダウロードができないサイトがある(IEEEなど)．
 東大のVPNを使うこと．
 
-![fig1](https://github.com/user-attachments/assets/3ee8d6da-0256-47ab-8d5d-be07153747fe)
+![image](https://github.com/user-attachments/assets/4c2cdd8b-1835-43cb-bd09-d20122127d21)
+
 
 添付画像のようにすると，192.168.1.14や192.168.1.171のサーバーにのみVPN経由でアクセスし，別のipには自宅の環境から直接アクセスする．
 大学当局に見られたくない通信をするときなど
