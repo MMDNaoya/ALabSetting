@@ -21,7 +21,7 @@ Pahse2 Algorithms: aes256-sha1,aes128-sha1,3des-sha1!
 
 
 論文誌のウェブサイトなどにアクセスすると，東大経由で接続していることは検知してくれるけど，なぜか論文のダウロードができないサイトがある(IEEEなど)．
-東大のVPNを使うこと．
+東大のVPNを使うか，[TREE](https://utokyo.idm.oclc.org/login?url=https://tokyo.summon.serialssolutions.com/)経由でアクセスすること．
 
 ![image](https://github.com/user-attachments/assets/4c2cdd8b-1835-43cb-bd09-d20122127d21)
 
